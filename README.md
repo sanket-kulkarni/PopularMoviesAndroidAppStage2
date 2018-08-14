@@ -1,0 +1,1 @@
+Please add www.themoviedb.org Api key in strings.xml

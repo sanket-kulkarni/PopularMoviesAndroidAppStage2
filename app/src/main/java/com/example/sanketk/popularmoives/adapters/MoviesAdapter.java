@@ -22,6 +22,7 @@ import java.util.List;
 
 public class MoviesAdapter extends Adapter<MoviesAdapter.ListHolder> {
     private static final String TAG = MoviesAdapter.class.getSimpleName();
+    private static final String imgUrl = "http://image.tmdb.org/t/p/w185/";
     Context context;
     public List<ResultsItem> resultsItemList;
     private final OnItemClickListener listener;
@@ -60,7 +61,7 @@ public class MoviesAdapter extends Adapter<MoviesAdapter.ListHolder> {
         Log.d(TAG,"onBindViewHolder resultsItem "+resultsItem);
 
         if (!TextUtils.isEmpty(resultsItem.getPosterPath())) {
-            Glide.with(this.context).load("http://image.tmdb.org/t/p/w185/" + resultsItem.getPosterPath()).into(holder.ivMoivePoster);
+            Glide.with(this.context).load(imgUrl + resultsItem.getPosterPath()).placeholder(R.drawable.ic_launcher_background).into(holder.ivMoivePoster);
         }
         else {
 

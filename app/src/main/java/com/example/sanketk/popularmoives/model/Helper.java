@@ -20,7 +20,12 @@ import com.example.sanketk.popularmoives.R;
  * Created by sanketk on 12-Aug-18.
  */
 
-public class Helper {
+public final class Helper {
+
+    private Helper()
+    {
+
+    }
 
     public static boolean isNetworkAvailble(Context ctx) {
         NetworkInfo activeNetwork = ((ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();

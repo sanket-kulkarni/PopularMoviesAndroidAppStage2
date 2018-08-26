@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -52,6 +53,7 @@ import retrofit2.Response;
 
 public class MoiveDetailsActivity extends AppCompatActivity implements TrailersAdapter.OnItemClickListener{
     private static final String TAG = MoiveDetailsActivity.class.getSimpleName();
+    private static final String imgUrl = "http://image.tmdb.org/t/p/w185/";
     ImageView ivMoviePoster;
     TextView tvMoiveTitle;
     TextView tvOverview;
@@ -99,7 +101,7 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
             this.tvVoteAverage.setText(strVoterAvg);
             this.tvReleaseDate.setText(strReleaseDate);
             if (!TextUtils.isEmpty(strPosterPath)) {
-                Glide.with(this).load("http://image.tmdb.org/t/p/w185/" + strPosterPath).into(this.ivMoviePoster);
+                Glide.with(this).load(imgUrl + strPosterPath).into(this.ivMoviePoster);
             }
             else
             {
@@ -122,10 +124,12 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
             getSupportActionBar().setTitle(strOriginalTitle);        }
         isFavMovie();
         if (isFav) {
-            btnfavorite.setBackgroundColor(getResources().getColor(R.color.color_movie_title));
+            btnfavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_24dp, 0, 0, 0);
+            btnfavorite.setText(R.string.mark_as_unfavorite);
 
         } else {
-            btnfavorite.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            btnfavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_border_24dp, 0, 0, 0);
+            btnfavorite.setText(R.string.mark_as_favorite);
 
         }
 
@@ -145,10 +149,9 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
                 }
             }
         });
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         initialiseRecyclerViews();
         webserviceGetTrailers();
-       // webserviceGetReviews();
     }
 
     private void initialiseRecyclerViews() {
@@ -274,7 +277,7 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
         }
         else
         {
-            Helper.showOkDialog(MoiveDetailsActivity.this, "No Internet Connection");
+            Helper.showOkDialog(MoiveDetailsActivity.this, getString(R.string.no_internet_connection));
         }
     }
 
@@ -320,7 +323,8 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
 
     private void addToFav() {
         isFav = true;
-        btnfavorite.setBackgroundColor(getResources().getColor(R.color.color_movie_title));
+        btnfavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_24dp, 0, 0, 0);
+        btnfavorite.setText(R.string.mark_as_unfavorite);
         ContentValues values = new ContentValues();
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_MOVIE_ID, resultsItem.getId());
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_MOVIE_TITLE,  resultsItem.getTitle());
@@ -328,11 +332,6 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_RATINGS, resultsItem.getVoteAverage());
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_SYNOPSIS, resultsItem.getOverview());
 
-
-        Uri addToFavUri = getContentResolver().insert(FavMoviesContract.FavMoviesEntry.CONTENT_URI, values);
-
-
-        //Bitmap bitmap = ((BitmapDrawable) ivMoviePoster.getDrawable()).getBitmap();
         Bitmap bitmap = ((GlideBitmapDrawable)ivMoviePoster.getDrawable().getCurrent()).getBitmap();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -348,14 +347,14 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
             e.printStackTrace();
         }
 
-
         Toast.makeText(MoiveDetailsActivity.this, R.string.added_to_favorites, Toast.LENGTH_SHORT).show();
 
     }
 
     private void removeFromFav() {
         isFav = false;
-        btnfavorite.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+        btnfavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_star_border_24dp, 0, 0, 0);
+        btnfavorite.setText(R.string.mark_as_favorite);
         int rowsDeleted = getContentResolver().delete(FavMoviesContract.FavMoviesEntry.CONTENT_URI, FavMoviesContract.FavMoviesEntry.COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(resultsItem.getId())});
 
         if (rowsDeleted > 0) {
@@ -363,5 +362,13 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
             Toast.makeText(this, R.string.removed_from_favs, Toast.LENGTH_SHORT).show();
         }
 
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return false;
     }
 }

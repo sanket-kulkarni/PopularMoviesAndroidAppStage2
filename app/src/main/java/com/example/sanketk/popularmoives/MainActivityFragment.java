@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,23 +46,14 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         setHasOptionsMenu(true);
-
         this.rvMoivesList = (RecyclerView) rootView.findViewById(R.id.rvMoivesList);
+        numColumns=(getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
         initialiseRecyclerView();
-        if (savedInstanceState != null) {
-            // Restore last state for checked position.
-            listType= savedInstanceState.getInt("listType", 0);
-            resultsItemList= savedInstanceState.getParcelableArrayList("resultsItemList");
-            if( this.listType == R.string.most_popular || this.listType == R.string.top_rated )
-            {
-                webserviceGetInfo();
-            }
-            else if(listType==R.string.favorites )
-            {
-                loadFavMovies();
-            }
+        if(savedInstanceState!=null) {
+            onRestoreState(savedInstanceState);
         }
         else {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.most_popular);
             webserviceGetInfo();
         }
         return rootView;
@@ -92,6 +85,7 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
                             MainActivityFragment.this.resultsItemList = (ArrayList<ResultsItem>) ((ApiResponse) response.body()).getResults();
                             MainActivityFragment.this.moviesArrayAdapter.resultsItemList = MainActivityFragment.this.resultsItemList;
                             MainActivityFragment.this.moviesArrayAdapter.notifyDataSetChanged();
+                            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listType);
                             return;
                         }
                     }
@@ -125,31 +119,22 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
         if (id == R.id.action_most_popular) {
             this.listType = R.string.most_popular;
             this.resultsItemList.clear();
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.most_popular);
             webserviceGetInfo();
             return true;
         }
         else if (id == R.id.action_favorites) {
             this.listType = R.string.favorites;
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.favorites);
             this.resultsItemList.clear();
             loadFavMovies();
             return true;
         }
         else {
             this.listType = R.string.top_rated;
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.top_rated);
             this.resultsItemList.clear();
             webserviceGetInfo();
             return true;
         }
     }
-
-
-
-
-
-
 
     private void initialiseRecyclerView() {
         if (this.resultsItemList == null) {
@@ -160,15 +145,6 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
         this.rvMoivesList.setAdapter(this.moviesArrayAdapter);
     }
 
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-
-        numColumns=(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
-        Log.d(TAG,"onConfigurationChanged numColumns "+numColumns);
-        super.onConfigurationChanged(newConfig);
-        initialiseRecyclerView();
-    }
 
     @Override
     public void onItemClick(ResultsItem resultsItem) {
@@ -191,7 +167,6 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
             getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             rvMoivesList.setVisibility(View.VISIBLE);
-            //mTvErrorMessageDisplay.setVisibility(View.INVISIBLE);
             if (cursor.getCount() > 0) {
 
 
@@ -217,7 +192,9 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
 
                 }
 
-                moviesArrayAdapter.notifyDataSetChanged();
+                MainActivityFragment.this.moviesArrayAdapter.resultsItemList = MainActivityFragment.this.resultsItemList;
+                MainActivityFragment.this.moviesArrayAdapter.notifyDataSetChanged();
+                ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listType);
                 mDialog.dismiss();
                 getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
@@ -225,43 +202,14 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
                 rvMoivesList.setVisibility(View.GONE);
                 getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 mDialog.dismiss();
-//                mTvErrorMessageDisplay.setVisibility(View.VISIBLE);
-//                mTvErrorMessageDisplay.setText(R.string.favorites_msg);
-//                mPbLoadingIndicator.setVisibility(View.INVISIBLE);
-
             }
         }
 
 
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("listType", listType);
-        outState.putParcelableArrayList("resultsItemList", resultsItemList);
-
-    }
 
 
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            // Restore last state for checked position.
-            listType= savedInstanceState.getInt("listType", 0);
-            resultsItemList= savedInstanceState.getParcelableArrayList("resultsItemList");
-            if( this.listType == R.string.most_popular || this.listType == R.string.top_rated )
-            {
-                webserviceGetInfo();
-            }
-            else if(listType==R.string.favorites )
-            {
-                loadFavMovies();
-            }
-        }
-    }
 
 
     @Override
@@ -274,7 +222,36 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt("listType", listType);
+        outState.putParcelableArrayList("resultsItemList", (ArrayList<? extends Parcelable>) resultsItemList);
+        outState.putParcelable("BUNDLE_RECYCLER_LAYOUT", rvMoivesList.getLayoutManager().onSaveInstanceState());
+        outState.putInt("lastFirstVisiblePosition",((LinearLayoutManager)rvMoivesList.getLayoutManager()).findFirstCompletelyVisibleItemPosition());
 
+    }
+    public void onRestoreState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            // Restore last state for checked position.
+            listType= savedInstanceState.getInt("listType", 0);
+            resultsItemList= savedInstanceState.getParcelableArrayList("resultsItemList");
+            Parcelable savedRecyclerLayoutState = savedInstanceState.getParcelable("BUNDLE_RECYCLER_LAYOUT");
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listType);
+            if( this.listType == R.string.most_popular || this.listType == R.string.top_rated )
+            {
+                MainActivityFragment.this.moviesArrayAdapter.resultsItemList = MainActivityFragment.this.resultsItemList;
+                MainActivityFragment.this.moviesArrayAdapter.notifyDataSetChanged();
+
+            }
+            else if(listType==R.string.favorites )
+            {
+                loadFavMovies();
+            }
+            //moviesArrayAdapter.notifyDataSetChanged();
+            rvMoivesList.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+
+        }
+    }
 
 
 }

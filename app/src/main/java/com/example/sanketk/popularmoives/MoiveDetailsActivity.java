@@ -236,7 +236,7 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
         }
         else
         {
-            Helper.showOkDialog(MoiveDetailsActivity.this, "No Internet Connection");
+            Helper.showOkDialog(MoiveDetailsActivity.this, getString(R.string.no_internet_connection));
         }
     }
 
@@ -331,6 +331,8 @@ public class MoiveDetailsActivity extends AppCompatActivity implements TrailersA
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_RDATE,  resultsItem.getReleaseDate());
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_RATINGS, resultsItem.getVoteAverage());
         values.put(FavMoviesContract.FavMoviesEntry.COLUMN_SYNOPSIS, resultsItem.getOverview());
+
+        Uri addToFavUri = getContentResolver().insert(FavMoviesContract.FavMoviesEntry.CONTENT_URI, values);
 
         Bitmap bitmap = ((GlideBitmapDrawable)ivMoviePoster.getDrawable().getCurrent()).getBitmap();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

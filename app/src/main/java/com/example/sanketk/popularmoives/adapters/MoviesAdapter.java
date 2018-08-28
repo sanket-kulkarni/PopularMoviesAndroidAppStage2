@@ -23,7 +23,7 @@ import java.util.List;
 public class MoviesAdapter extends Adapter<MoviesAdapter.ListHolder> {
     private static final String TAG = MoviesAdapter.class.getSimpleName();
     private static final String imgUrl = "http://image.tmdb.org/t/p/w185/";
-    Context context;
+    private Context context;
     public List<ResultsItem> resultsItemList;
     private final OnItemClickListener listener;
 

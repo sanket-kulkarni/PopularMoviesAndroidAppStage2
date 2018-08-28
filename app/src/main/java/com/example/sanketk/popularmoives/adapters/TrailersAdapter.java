@@ -22,7 +22,7 @@ import java.util.List;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ListHolder> {
     private static final String TAG = TrailersAdapter.class.getSimpleName();
-    Context context;
+    private Context context;
     public List<TrailerResultsItem> trailerResultsItems;
     private final TrailersAdapter.OnItemClickListener listener;
 

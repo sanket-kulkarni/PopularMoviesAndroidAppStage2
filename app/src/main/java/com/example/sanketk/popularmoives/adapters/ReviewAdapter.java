@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ReviewAdapter  extends RecyclerView.Adapter<ReviewAdapter.ListHolder> {
     private static final String TAG = ReviewAdapter.class.getSimpleName();
-    Context context;
+    private Context context;
     public List<ReviewsResultsItem> reviewsResultsItems;
     //private final ReviewAdapter.OnItemClickListener listener;
 

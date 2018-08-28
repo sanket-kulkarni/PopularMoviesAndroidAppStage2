@@ -122,6 +122,12 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
             webserviceGetInfo();
             return true;
         }
+         else if (id == R.id.action_top_rated) {
+            this.listType = R.string.top_rated;
+            this.resultsItemList.clear();
+            webserviceGetInfo();
+            return true;
+        }
         else if (id == R.id.action_favorites) {
             this.listType = R.string.favorites;
             this.resultsItemList.clear();
@@ -129,7 +135,7 @@ public class MainActivityFragment extends Fragment implements MoviesAdapter.OnIt
             return true;
         }
         else {
-            this.listType = R.string.top_rated;
+            this.listType = R.string.most_popular;
             this.resultsItemList.clear();
             webserviceGetInfo();
             return true;
